@@ -1,125 +1,346 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Espetada Review – Mobile Test</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Interactive Review Studio — Espetada (Apple-class)</title>
+
+<!-- Tailwind CDN -->
 <script src="https://cdn.tailwindcss.com"></script>
+
 <style>
   :root{
-    --lime:#c7ff00;
-    --glass:rgba(255,255,255,0.03);
+    --lime: #c7ff00;
+    --ice: #b8e4ff;
+    --beige: #f5e5c0;
+    --bg0: #0e1012;
+    --bg1: #151617;
+    --glass: rgba(255,255,255,0.03);
   }
+
+  html,body{height:100%}
   body{
-    background:linear-gradient(180deg,#0e0e0f,#191a1b);
-    color:#e9ecef;
-    font-family:Inter,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-    padding:1rem;
+    margin:0;
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    background: linear-gradient(180deg,var(--bg0),var(--bg1));
+    color: var(--ice);
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    padding:18px 14px;
   }
-  .glass{
-    background:var(--glass);
-    border:1px solid rgba(255,255,255,0.05);
-    backdrop-filter:blur(8px);
-    border-radius:1rem;
-    box-shadow:0 4px 20px rgba(0,0,0,0.4);
+
+  /* Glass panel */
+  .glass {
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border: 1px solid rgba(255,255,255,0.04);
+    backdrop-filter: blur(8px) saturate(110%);
+    -webkit-backdrop-filter: blur(8px) saturate(110%);
+    box-shadow: 8px 12px 30px rgba(0,0,0,0.55), -6px -6px 20px rgba(255,255,255,0.015);
   }
-  select{
-    background:transparent;
-    border:none;
-    border-bottom:1px dashed rgba(255,255,255,0.2);
-    color:inherit;
-    font-size:0.85rem;
-    font-weight:600;
-    outline:none;
+
+  /* Tabs */
+  .tab-btn {
+    color: var(--ice);
+    background: transparent;
+    border: none;
+    font-weight: 700;
+    padding: 8px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: background .18s, color .18s;
   }
-  .hl{color:var(--lime);}
-  .copy-btn{
-    background:rgba(255,255,255,0.05);
-    border:1px solid rgba(255,255,255,0.08);
-    border-radius:0.5rem;
-    padding:0.4rem 0.8rem;
-    font-size:0.85rem;
-    transition:all .2s;
+  .tab-btn.active {
+    background: rgba(199,255,0,0.10);
+    color: var(--lime);
+    box-shadow: inset 0 -2px 0 rgba(199,255,0,0.06);
   }
-  .copy-btn:hover{background:var(--lime);color:#000;}
+
+  /* selects inline */
+  .inline-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background: transparent;
+    border: none;
+    border-bottom: 1px dashed rgba(255,255,255,0.08);
+    color: var(--ice);
+    font-weight:700;
+    font-size:0.94rem;
+    padding: 2px 18px 2px 4px;
+    margin: 0 6px;
+    outline: none;
+  }
+  .inline-wrap {
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    vertical-align: middle;
+  }
+
+  /* highlighted phrase */
+  .hl {
+    color: var(--lime);
+    display:inline-block;
+    padding:0 0.08rem;
+    border-radius:4px;
+    transition: transform .18s, background .2s;
+  }
+  .hl.activated{
+    transform: translateY(-2px);
+    background: rgba(199,255,0,0.04);
+  }
+
+  /* small text sizes for phone */
+  .small-body { font-size: 0.92rem; line-height:1.45rem; }
+  .tiny { font-size: 0.78rem; }
+
+  /* copy button */
+  .copy-btn {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.04);
+    color: var(--ice);
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-weight:700;
+    transition: all .15s;
+  }
+  .copy-btn:hover {
+    background: var(--lime);
+    color: #050505;
+    transform: translateY(-2px);
+  }
+
+  /* floating Language Boost icon (small) */
+  .boost-btn {
+    position: fixed;
+    right: 16px;
+    bottom: 18px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.03);
+    padding: 10px 12px;
+    border-radius: 999px;
+    color: var(--ice);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.45);
+    display:flex;align-items:center;gap:8px;
+    z-index:1200;
+  }
+  .boost-btn .dot {
+    width:10px;height:10px;border-radius:10px;background:var(--lime);
+    box-shadow: 0 6px 18px rgba(199,255,0,0.08);
+  }
+
+  /* panel transitions */
+  .panel { transform: translateY(6px); opacity:0; transition: transform .36s ease, opacity .36s ease; }
+  .panel.visible { transform: translateY(0); opacity:1; }
+
+  /* responsive */
+  @media(min-width:900px){
+    .layout { display:grid; grid-template-columns: 1fr 360px; gap:18px; align-items:start; }
+  }
+  @media(max-width:899px){
+    .layout { display:block; }
+    .boost-btn { right:14px; bottom:14px; }
+  }
 </style>
 </head>
-<body class="max-w-md mx-auto">
+<body>
 
-<h1 class="text-xl font-semibold mb-2" style="color:var(--lime)">Espetada Review (Mobile Test)</h1>
+<main class="max-w-3xl mx-auto space-y-4">
+  <!-- Header -->
+  <header class="flex items-start justify-between gap-3">
+    <div>
+      <h1 class="text-2xl font-semibold" style="color:var(--lime)">Interactive Review Studio</h1>
+      <p class="tiny mt-1" style="color:var(--beige)">Magazine-style samples • useful expressions • builder • model tests</p>
+    </div>
 
-<div class="glass p-4 text-sm leading-relaxed" id="review">
-  <span class="hl"><select id="intro"></select></span>,
-  <span class="hl"><select id="food"></select></span>.
-  <span class="hl"><select id="decor"></select></span>.
-  <span class="hl"><select id="staff"></select></span>.
-  <span class="hl"><select id="recommend"></select></span>
-</div>
+    <nav class="flex gap-2">
+      <button class="tab-btn active" data-tab="expressions">Useful Expressions</button>
+      <button class="tab-btn" data-tab="builder">Build Your Review</button>
+      <button class="tab-btn" data-tab="samples">Sample Reviews</button>
+    </nav>
+  </header>
 
-<button id="copyBtn" class="copy-btn mt-3">Copy Review</button>
-<p id="copied" class="text-xs text-neutral-400 mt-2 hidden">Copied ✓</p>
+  <!-- Main layout -->
+  <section class="layout">
 
-<script>
-const DATA={
-  intro:[
-    "Built in the 1970s and regarded by locals as one of the most iconic Espetada restaurants in Funchal",
-    "Located in the old quarter of Funchal, this traditional Espetada house",
-    "Tucked away near the harbour, this charming restaurant",
-    "If you are looking for an authentic Espetada experience, this place will not disappoint",
-    "Perched on a quiet street, this restaurant is famous for its classic skewers"
-  ],
-  food:[
-    "serves remarkable skewers of marinated beef grilled over laurel wood",
-    "offers by far one of the most tender Espetadas I have ever had",
-    "is known for its brilliant balance of flavour and texture",
-    "presents what might be the most impressive Espetada in town",
-    "delivers a meal you will find both satisfying and special"
-  ],
-  decor:[
-    "The décor characterises Madeira’s rustic charm with timber beams and soft lighting",
-    "Its appealing mix of stone and wicker creates a warm atmosphere",
-    "The interior is simple yet impressive, reflecting local craftsmanship",
-    "The space is described as elegant and comfortable, truly unique",
-    "Every corner feels inviting, appreciated for its authenticity"
-  ],
-  staff:[
-    "The staff are gracious and professional",
-    "I was fortunate to meet a brilliant team who enjoy what they do",
-    "Service is considered one of the most positive aspects of the restaurant",
-    "Guests will find the staff attentive and genuinely welcoming",
-    "Known for its friendly service, the team ensures a pleasant visit"
-  ],
-  recommend:[
-    "I highly recommend this restaurant for anyone who appreciates traditional cuisine with a refined touch",
-    "By far one of the most memorable dining experiences you will find in Funchal",
-    "If you are looking for a special dinner, this place will not disappoint",
-    "I guarantee that this restaurant will not disappoint any food lover",
-    "This is a place you simply cannot afford to miss"
-  ]
-};
+    <!-- Left column (panels) -->
+    <div>
 
-for(const key in DATA){
-  const sel=document.getElementById(key);
-  DATA[key].forEach((opt,i)=>{
-    const o=document.createElement('option');
-    o.value=i;o.textContent=opt;sel.appendChild(o);
-  });
-}
+      <!-- Panel: Useful Expressions -->
+      <section id="expressions" class="glass p-4 rounded-xl panel visible">
+        <h2 class="font-semibold" style="color:var(--lime)">Useful expressions (in paragraph order)</h2>
+        <p class="tiny text-beige mt-2" style="color:var(--beige)">Tap any phrase to copy it. Phrases are grouped for each paragraph (Intro → Food → Décor → Staff → Recommendation).</p>
 
-document.getElementById('copyBtn').onclick=()=>{
-  const parts=[];
-  for(const key in DATA){
-    const i=document.getElementById(key).value;
-    parts.push(DATA[key][i]);
-  }
-  const text=parts.join('. ') + '.';
-  navigator.clipboard.writeText(text).then(()=>{
-    const c=document.getElementById('copied');
-    c.classList.remove('hidden');
-    setTimeout(()=>c.classList.add('hidden'),1500);
-  });
-};
-</script>
+        <div class="mt-3 space-y-3 small-body">
+          <!-- Intro expressions -->
+          <div>
+            <h4 class="font-semibold" style="color:var(--lime)">Intro</h4>
+            <div class="mt-1 grid grid-cols-1 gap-2">
+              <button class="glass p-2 text-left tiny copyPhrase" data-phrase="Choosing a restaurant can be a huge challenge; this one is regarded by locals as one of the finest in Funchal.">Choosing a restaurant can be a huge challenge; this one is regarded by locals as one of the finest in Funchal.</button>
+              <button class="glass p-2 text-left tiny copyPhrase" data-phrase="Built in the 1970s and known for its authentic Espetada, it has become a local landmark.">Built in the 1970s and known for its authentic Espetada, it has become a local landmark.</button>
+              <button class="glass p-2 text-left tiny copyPhrase" data-phrase="Perched near the old market, this restaurant is considered by many as the place to taste traditional espetada.">Perched near the old market, this restaurant is considered by many as the place to taste traditional espetada.</button>
+              <button class="glass p-2 text-left tiny copyPhrase" data-phrase="Tucked away in the heart of Funchal, it describes the island’s flavours with confidence.">Tucked away in the heart of Funchal, it describes the island’s flavours with confidence.</button>
+              <button class="glass p-2 text-left tiny copyPhrase" data-phrase="When it comes to choosing a place for Espetada, this one is often regarded as special and unforgettable.">When it comes to choosing a place for Espetada, this one is often regarded as special and unforgettable.</button>
+            </div>
+          </div>
 
-</body>
-</html>
+          <!-- Food expressions -->
+          <div>
+            <h4 class="font-semibold" style="color:var(--lime)">Food</h4>
+            <div class="mt-1 grid grid-cols-1 gap-2">
+              <button class="glass p-2 text-left tiny copyPhrase" data-phrase="What makes this espetada so remarkable is its balance of smoke, seasoning and pure beef flavour.">What makes this espetada so remarkable is its balance of smoke, seasoning and pure beef flavour.</button>
+              <button class="glass p-2 text-left tiny copyPhrase" data-phrase="By far one of the most tender espetadas I have ever had — each bite offers a near-perfect texture.">By far one of the most tender espetadas I have ever had — each bite offers a near-perfect texture.</button>
+              <button class="glass p-2 text-left tiny copyPhrase" data-phrase="The dish is brilliant in its simplicity: laurel-wood char, sea salt and a hint of local honey.">The dish is brilliant in its simplicity: laurel-wood char, sea salt and a hint of local honey.</button>
+              <button class="glass p-2 text-left tiny copyPhrase" data-phrase="You will find that the seasoning elevates rather than masks the meat’s natural character.">You will find that the seasoning elevates rather than masks the meat’s natural character.</button>
+              <button class="glass p-2 text-left tiny copyPhrase" data-phrase="If you are looking for an authentic espetada, this will not disappoint.">If you are looking for an authentic espetada, this will not disappoint.</button>
+            </div>
+          </div>
+
+          <!-- Decor expressions -->
+          <div>
+            <h4 class="font-semibold" style="color:var(--lime)">Décor</h4>
+            <div class="mt-1 grid grid-cols-1 gap-2">
+              <button class="glass p-2 text-left tiny copyPhrase" data-phrase="The décor characterises Madeira’s spirit: warm timber, stone floors and comfortable seating.">The décor characterises Madeira’s spirit: warm timber, stone floors and comfortable seating.</button>
+              <button class="glass p-2 text-left tiny copyPhrase" data-phrase="An appealing blend of rustic and refined elements gives the room a quietly sophisticated air.">An appealing blend of rustic and refined elements gives the room a quietly sophisticated air.</button>
+              <button class="glass p-2 text-left tiny copyPhrase" data-phrase="The space is described as intimate yet airy, with careful attention to texture and light.">The space is described as intimate yet airy, with careful attention to texture and light.</button>
+              <button class="glass p-2 text-left tiny copyPhrase" data-phrase="It feels unique and special — every detail seems chosen to support the food.">It feels unique and special — every detail seems chosen to support the food.</button>
+              <button class="glass p-2 text-left tiny copyPhrase" data-phrase="Built in a traditional style, the interior feels rooted and honest.">Built in a traditional style, the interior feels rooted and honest.</button>
+            </div>
+          </div>
+
+          <!-- Staff expressions -->
+          <div>
+            <h4 class="font-semibold" style="color:var(--lime)">Staff</h4>
+            <div class="mt-1 grid grid-cols-1 gap-2">
+              <button class="glass p-2 text-left tiny copyPhrase" data-phrase="The staff are gracious and discreet — attentive without ever overbearing.">The staff are gracious and discreet — attentive without ever overbearing.</button>
+              <button class="glass p-2 text-left tiny copyPhrase" data-phrase="I was fortunate to meet a brilliant team whose professionalism is matched by genuine warmth.">I was fortunate to meet a brilliant team whose professionalism is matched by genuine warmth.</button>
+              <button class="glass p-2 text-left tiny copyPhrase" data-phrase="Guests will find service efficient, informed and quietly confident.">Guests will find service efficient, informed and quietly confident.</button>
+              <button class="glass p-2 text-left tiny copyPhrase" data-phrase="Considered one of the restaurant’s strengths, the front-of-house adds calm expertise to the meal.">Considered one of the restaurant’s strengths, the front-of-house adds calm expertise to the meal.</button>
+              <button class="glass p-2 text-left tiny copyPhrase" data-phrase="Known for their friendly recommendations, the team makes each visit smoother.">Known for their friendly recommendations, the team makes each visit smoother.</button>
+            </div>
+          </div>
+
+          <!-- Recommendation expressions -->
+          <div>
+            <h4 class="font-semibold" style="color:var(--lime)">Recommendation</h4>
+            <div class="mt-1 grid grid-cols-1 gap-2">
+              <button class="glass p-2 text-left tiny copyPhrase" data-phrase="I highly recommend this restaurant for anyone who appreciates perfected, simple cooking.">I highly recommend this restaurant for anyone who appreciates perfected, simple cooking.</button>
+              <button class="glass p-2 text-left tiny copyPhrase" data-phrase="I can assure you that for anyone looking for a memorable espetada, this is a must.">I can assure you that for anyone looking for a memorable espetada, this is a must.</button>
+              <button class="glass p-2 text-left tiny copyPhrase" data-phrase="By far one of the most satisfying meals to be had in Funchal — book ahead.">By far one of the most satisfying meals to be had in Funchal — book ahead.</button>
+              <button class="glass p-2 text-left tiny copyPhrase" data-phrase="This is a place you cannot afford to miss if you value tradition done exceptionally well.">This is a place you cannot afford to miss if you value tradition done exceptionally well.</button>
+              <button class="glass p-2 text-left tiny copyPhrase" data-phrase="If you are looking for a special夕 dining experience, this restaurant will not disappoint.">If you are looking for a special dining experience, this restaurant will not disappoint.</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Panel: Build Your Review -->
+      <section id="builder" class="glass p-4 rounded-xl mt-4 panel">
+        <div class="flex items-start justify-between">
+          <h2 class="font-semibold" style="color:var(--lime)">Build Your Review</h2>
+          <div class="tiny" style="color:var(--beige)">Inline selects • small text for mobile</div>
+        </div>
+
+        <p class="small-body mt-3 text-neutral-100">
+          <span id="buildIntro" class="inline-wrap"></span>,
+          <span id="buildFood" class="inline-wrap"></span>.
+          <br />
+          <span id="buildDecor" class="inline-wrap"></span>.
+          <br />
+          <span id="buildStaff" class="inline-wrap"></span>.
+          <br />
+          <span id="buildRec" class="inline-wrap"></span>
+        </p>
+
+        <div class="mt-4 flex gap-2 items-center">
+          <button id="copyBuild" class="copy-btn">Copy generated review</button>
+          <div id="buildCopied" class="tiny text-beige hidden">Copied ✓</div>
+        </div>
+        <p class="tiny mt-2" style="color:var(--beige)">Tip: choose alternatives and watch the highlighted phrases update instantly.</p>
+      </section>
+
+      <!-- Panel: Sample Reviews -->
+      <section id="samples" class="glass p-4 rounded-xl mt-4 panel">
+        <h2 class="font-semibold" style="color:var(--lime)">Sample Reviews (model tests)</h2>
+        <p class="tiny mt-1" style="color:var(--beige)">Each sample follows: <em>Key expression + Reason + Example + Result + Contrast</em>.</p>
+
+        <div class="mt-3 space-y-3 small-body">
+          <!-- Espetada sample (expanded by default) -->
+          <article class="glass p-3 rounded-lg">
+            <div class="flex items-center justify-between">
+              <strong style="color:var(--ice)">Espetada — Restaurante do Mercado (Funchal)</strong>
+              <button class="tiny copySample copy-btn" data-text-id="sampleEsp">Copy</button>
+            </div>
+            <div id="sampleEsp" class="mt-2 text-neutral-100 tiny">
+              <p><strong class="hl">Known for its authentic espetada,</strong> the restaurant continues to impress because the meat is carefully sourced and roasted over laurel wood — for example, the set menu pairs a brisket espetada with a smoky, caramelised crust that yields a tender bite. The result is deeply satisfying; compared with many tourist-focused spots, this one retains an honest, traditional flavour.</p>
+
+              <p><strong class="hl">What makes the food so special</strong> is the restrained seasoning which allows the beef’s natural quality to shine — for instance, a simple brush of local honey in one dish enhanced the caramel notes. The outcome is a plate that feels both refined and homely; it contrasts with flashier restaurants where sauces mask the meat.</p>
+
+              <p><strong class="hl">The décor characterises Madeira’s rustic warmth,</strong> with exposed beams and stone details — the wooden tables and low lighting create a comfortable scene. The effect is intimate and appealing; in contrast to contemporary minimalist venues, this space emphasises tradition.</p>
+
+              <p><strong class="hl">The staff are gracious and discreet,</strong> offering recommendations and timely service — for example, the waiter suggested a side that complemented the espetada perfectly. Guests will find the service enhances the meal; contrasted with rushed tourist eateries, the team here slows the pace to match the food.</p>
+
+              <p><strong class="hl">I highly recommend this restaurant</strong> for anyone seeking an authentic Madeiran meal: book ahead and arrive hungry, and you’ll find a memorable dining experience. It’s one of those places you won’t regret visiting.</p>
+            </div>
+          </article>
+
+          <!-- Film sample -->
+          <article class="glass p-3 rounded-lg">
+            <div class="flex items-center justify-between">
+              <strong style="color:var(--ice)">Film — Whispering Streets</strong>
+              <button class="tiny copySample copy-btn" data-text-id="sampleFilm">Copy</button>
+            </div>
+            <div id="sampleFilm" class="mt-2 text-neutral-100 tiny hidden">
+              <p><strong class="hl">Regarded by critics as one of the most daring works,</strong> the film succeeds because it combines bold visual choices with disciplined storytelling — for example, the sustained long-take in the second act creates tension while the sparse score restrains melodrama. The result is a haunting atmosphere; contrasted with conventional thrillers, it refuses easy catharsis.</p>
+
+              <p><strong class="hl">What makes the direction impressive</strong> is its confident restraint — a clear instance is the lead actor’s silent performance that reveals a complex interior life. Viewers will find the subtlety rewarding; in comparison to blockbuster gestures, this film asks more of its audience.</p>
+
+              <p><strong class="hl">I can assure you that for anyone looking for thoughtful cinema,</strong> this title is a must — it lingers in memory and continues to provoke questions long after the credits roll.</p>
+            </div>
+          </article>
+
+          <!-- Book sample -->
+          <article class="glass p-3 rounded-lg">
+            <div class="flex items-center justify-between">
+              <strong style="color:var(--ice)">Book — The Salt House</strong>
+              <button class="tiny copySample copy-btn" data-text-id="sampleBook">Copy</button>
+            </div>
+            <div id="sampleBook" class="mt-2 text-neutral-100 tiny hidden">
+              <p><strong class="hl">This novel is considered one of the quieter masterpieces,</strong> because the author uses a restrained voice to explore family memory — for example, a single chapter told through domestic details reveals a character’s loss without melodrama. The result: emotional depth that accumulates slowly; contrasted with more explicit narratives, it rewards patience.</p>
+
+              <p><strong class="hl">The prose is remarkable</strong> for its precision and tactile description, which allows readers to appreciate small domestic objects as carriers of meaning. Many will find the book quietly profound; compared with sprawling epics, it concentrates power into modest pages.</p>
+
+              <p><strong class="hl">I can assure readers that if you are looking for a contemplative, beautifully written novel,</strong> this is a must-read.</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Right column: quick controls / language boost -->
+    <aside class="mt-2">
+      <div class="glass p-4 rounded-xl panel visible">
+        <h3 class="font-semibold" style="color:var(--lime)">Quick controls</h3>
+        <p class="tiny mt-2" style="color:var(--beige)">Tap tabs to switch panels. Use Copy to export phrases or full reviews.</p>
+
+        <div class="mt-3 space-y-2">
+          <button id="openBoost" class="copy-btn w-full tiny">Language Boost (floating)</button>
+          <button id="showAllSamples" class="copy-btn w-full tiny">Show all sample texts</button>
+        </div>
+      </div>
+
+      <div class="glass p-3 rounded-xl mt-3 panel visible tiny" style="color:var(--beige)">
+        <strong style="color:var(--ice)">Font & spacing</strong>
+        <p class="mt-2">Designed for phones: small body text, increased line-height, and padded glass panels to prevent overflow.</p>
+      </div>
+    </aside>
+
+  </section>
+
+</main>
+
+<!-- Floating Language Boost (appears when toggled) -->
+<div id="boostPanel" class="glass fixed left-1/2 transform -translate-x-1/2 bottom-6 w-11/12 max-w-md p-3 rounded-2xl hidden z-50">
+  <div class="flex items-center justify-between">
+    <div><strong style="color:var(--lime)">Language Boost</strong><div class="tiny" style="color:var(--beige)">Tap a phrase to copy it to cli
