@@ -343,4 +343,219 @@
 <!-- Floating Language Boost (appears when toggled) -->
 <div id="boostPanel" class="glass fixed left-1/2 transform -translate-x-1/2 bottom-6 w-11/12 max-w-md p-3 rounded-2xl hidden z-50">
   <div class="flex items-center justify-between">
-    <div><strong style="color:var(--lime)">Language Boost</strong><div class="tiny" style="color:var(--beige)">Tap a phrase to copy it to cli
+    <div><strong style="color:var(--lime)">Language Boost</strong><div class="tiny" style="color:var(--beige)">Tap a phrase to copy it to clipboard</div></div>
+    <button id="closeBoost" class="copy-btn tiny">Close</button>
+  </div>
+
+  <div class="mt-3 grid grid-cols-1 gap-2 tiny">
+    <!-- We'll reuse expressions — grouped; each button copies -->
+    <div><strong style="color:var(--lime)">Intro</strong>
+      <div class="mt-1 grid gap-1">
+        <button class="glass p-2 text-left copyPhrase" data-phrase="Choosing a restaurant can be a huge challenge; this one is regarded by locals as one of the finest in Funchal.">Choosing a restaurant can be a huge challenge; this one is regarded by locals as one of the finest in Funchal.</button>
+        <button class="glass p-2 text-left copyPhrase" data-phrase="Built in the 1970s and known for its authentic Espetada, it has become a local landmark.">Built in the 1970s and known for its authentic Espetada, it has become a local landmark.</button>
+      </div>
+    </div>
+
+    <div><strong style="color:var(--lime)">Recommendation</strong>
+      <div class="mt-1 grid gap-1">
+        <button class="glass p-2 text-left copyPhrase" data-phrase="I highly recommend this restaurant for anyone who appreciates perfected, simple cooking.">I highly recommend this restaurant for anyone who appreciates perfected, simple cooking.</button>
+        <button class="glass p-2 text-left copyPhrase" data-phrase="I can assure you that for anyone looking for a memorable espetada, this is a must.">I can assure you that for anyone looking for a memorable espetada, this is a must.</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Floating Boost Button -->
+<button id="boostBtn" class="boost-btn">
+  <div class="dot"></div>
+  <div class="tiny">Language Boost</div>
+</button>
+
+<script>
+  /* --------- Tab navigation --------- */
+  const tabs = document.querySelectorAll('.tab-btn');
+  tabs.forEach(btn => btn.addEventListener('click', (e) => {
+    tabs.forEach(b => b.classList.remove('active'));
+    e.currentTarget.classList.add('active');
+    const t = e.currentTarget.getAttribute('data-tab');
+    // hide all panels
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('visible'));
+    // show selected
+    const map = { expressions: '#expressions', builder: '#builder', samples: '#samples' };
+    document.querySelector(map[t]).classList.add('visible');
+    // small delay ensures transition
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }));
+
+  /* --------- Copy phrase buttons (Useful Expressions & Boost) --------- */
+  document.querySelectorAll('.copyPhrase').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const phrase = btn.getAttribute('data-phrase');
+      navigator.clipboard.writeText(phrase).then(()=> {
+        btn.innerText = 'Copied ✓';
+        setTimeout(()=> { btn.innerText = phrase }, 900);
+      }).catch(()=> alert('Copy failed — select text manually.'));
+    });
+  });
+
+  /* --------- Build Your Review: inline selects populated from larger DATA set --------- */
+  const DATA = {
+    intro: [
+      "Tucked away in the heart of Funchal, this Espetada restaurant",
+      "Built in the 1970s and regarded by locals as one of the most iconic espetada houses",
+      "Perched near the old market, the restaurant offers an authentic Espetada experience",
+      "If you are looking for an authentic espetada, this place will not disappoint",
+      "Located a short walk from the marina, this intimate spot specialises in laurel-wood grilled skewers"
+    ],
+    food: [
+      "serves skewered beef roasted over laurel wood, producing a smoky, caramelised crust that complements the tender meat",
+      "offers by far one of the most tender espetadas I have ever had — generous, perfectly rested slices",
+      "presents espetadas with a modern twist: precise seasoning, a glossy char and balanced sauces",
+      "is brilliant in its simplicity: good meat, restrained seasoning, respectful technique",
+      "delivers plates that are special for their texture and restraint rather than flashy sauces"
+    ],
+    decor: [
+      "The décor characterises Madeira’s rustic charm with timber beams and warm lighting",
+      "An appealing blend of stone and wicker creates a quietly refined interior",
+      "The space is described as intimate and authentic, simple yet elegant",
+      "Clean lines and tactile materials give the room a restrained, modern warmth",
+      "Every corner feels curated — small details reveal careful thought and taste"
+    ],
+    staff: [
+      "The staff are gracious and discreet — attentive without ever being overbearing",
+      "I was fortunate to meet a team whose warmth and professionalism are equally impressive",
+      "Guests will find the service efficient and genuinely welcoming",
+      "The front-of-house balances friendliness with clear expertise and helpful local recommendations",
+      "Service is considered one of the restaurant’s strengths: polite, timely and quietly effective"
+    ],
+    recommend: [
+      "I highly recommend this restaurant for anyone who appreciates perfected, simple cooking",
+      "I can assure you that for anyone looking for a memorable espetada, this is a must",
+      "By far one of the most memorable dining experiences you will find in Funchal",
+      "This is a restaurant you cannot afford to miss if you value tradition done exceptionally well",
+      "If you are looking for a special dinner, this place will not disappoint"
+    ]
+  };
+
+  // create inline selects and highlight spans
+  function createInline(key, placeId) {
+    const container = document.getElementById(placeId);
+    container.innerHTML = '';
+    const selectWrap = document.createElement('span');
+    selectWrap.className = 'inline-wrap';
+    const sel = document.createElement('select');
+    sel.className = 'inline-select';
+    sel.setAttribute('data-key', key);
+    DATA[key].forEach((opt, i) => {
+      const o = document.createElement('option'); o.value = i; o.textContent = opt; sel.appendChild(o);
+    });
+    sel.value = 0;
+    const hl = document.createElement('span');
+    hl.className = 'hl';
+    hl.setAttribute('data-hl', key);
+    hl.textContent = DATA[key][0];
+    selectWrap.appendChild(sel);
+    selectWrap.appendChild(hl);
+    container.appendChild(selectWrap);
+
+    sel.addEventListener('change', (e) => {
+      const idx = parseInt(e.target.value,10);
+      hl.textContent = DATA[key][idx];
+      hl.classList.remove('activated'); void hl.offsetWidth; hl.classList.add('activated');
+      refreshBuildText();
+    });
+  }
+
+  // initialize builder
+  ['intro','food','decor','staff','recommend'].forEach((k, i) => {
+    const place = {intro:'buildIntro', food:'buildFood', decor:'buildDecor', staff:'buildStaff', recommend:'buildRec'}[k];
+    createInline(k, place);
+  });
+
+  // Refresh assembled text (mainly highlighting is updated by change handlers)
+  function refreshBuildText(){
+    // no extra action needed; highlight spans show selection. But make sure hl text is present.
+    // Optionally, update a hidden field for copy
+  }
+
+  // Copy built review
+  document.getElementById('copyBuild').addEventListener('click', ()=>{
+    const parts = [];
+    ['intro','food','decor','staff','recommend'].forEach(k=>{
+      const sel = document.querySelector(`select[data-key="${k}"]`);
+      const idx = parseInt(sel.value,10);
+      parts.push( DATA[k][idx] + (k==='intro' ? ',' : '.') );
+    });
+    const text = parts.join(' ');
+    navigator.clipboard.writeText(text).then(()=>{
+      document.getElementById('buildCopied').classList.remove('hidden');
+      setTimeout(()=> document.getElementById('buildCopied').classList.add('hidden'), 1400);
+    }).catch(()=> alert('Copy failed — select text manually.'));
+  });
+
+  /* --------- Sample reviews: expand/collapse & copy --------- */
+  document.querySelectorAll('.copySample').forEach(btn=>{
+    btn.addEventListener('click', ()=> {
+      const id = btn.getAttribute('data-text-id');
+      const node = document.getElementById(id);
+      // if hidden, show it first
+      if (node.classList.contains('hidden')) {
+        node.classList.remove('hidden');
+      }
+      // Gather text content
+      const text = node.innerText;
+      navigator.clipboard.writeText(text).then(()=> {
+        btn.textContent = 'Copied ✓';
+        setTimeout(()=> btn.textContent = 'Copy', 900);
+      }).catch(()=> alert('Copy failed.'));
+    });
+  });
+
+  // Toggle Film and Book samples (they start hidden); clicking headers will toggle
+  document.querySelectorAll('#samples article').forEach(article=>{
+    const header = article.querySelector('strong');
+    header.style.cursor = 'pointer';
+    header.addEventListener('click', ()=>{
+      const body = article.querySelector('div[id^="sample"]');
+      if (!body) return;
+      body.classList.toggle('hidden');
+    });
+  });
+
+  /* --------- Boost panel toggles --------- */
+  const boostBtn = document.getElementById('boostBtn');
+  const boostPanel = document.getElementById('boostPanel');
+  const openBoost = document.getElementById('openBoost');
+  const closeBoost = document.getElementById('closeBoost');
+  boostBtn.addEventListener('click', ()=> boostPanel.classList.toggle('hidden'));
+  openBoost.addEventListener('click', ()=> boostPanel.classList.toggle('hidden'));
+  closeBoost.addEventListener('click', ()=> boostPanel.classList.add('hidden'));
+
+  /* --------- Initial panel show (panels already set visible in markup) --------- */
+  document.querySelectorAll('.panel').forEach((p,i) => {
+    // slight stagger
+    setTimeout(()=> p.classList.add('visible'), 80 + i*70);
+  });
+
+  /* --------- UX: copyPhrase also copies from Language Boost inside panel --------- */
+  // (copyPhrase handlers set earlier)
+
+  /* --------- Small accessibility: keyboard focus style for inline selects --------- */
+  document.addEventListener('focusin', (e)=>{
+    if (e.target && e.target.classList && e.target.classList.contains('inline-select')) {
+      e.target.style.color = 'var(--lime)';
+    }
+  });
+  document.addEventListener('focusout', (e)=>{
+    if (e.target && e.target.classList && e.target.classList.contains('inline-select')) {
+      e.target.style.color = '';
+    }
+  });
+
+  // ensure sample bodies expand on initial load for first sample (Espetada)
+  document.getElementById('sampleEsp').classList.remove('hidden');
+
+</script>
+</body>
+</html>
