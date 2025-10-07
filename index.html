@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Espetada Review – Mobile Test</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  :root{
+    --lime:#c7ff00;
+    --glass:rgba(255,255,255,0.03);
+  }
+  body{
+    background:linear-gradient(180deg,#0e0e0f,#191a1b);
+    color:#e9ecef;
+    font-family:Inter,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    padding:1rem;
+  }
+  .glass{
+    background:var(--glass);
+    border:1px solid rgba(255,255,255,0.05);
+    backdrop-filter:blur(8px);
+    border-radius:1rem;
+    box-shadow:0 4px 20px rgba(0,0,0,0.4);
+  }
+  select{
+    background:transparent;
+    border:none;
+    border-bottom:1px dashed rgba(255,255,255,0.2);
+    color:inherit;
+    font-size:0.85rem;
+    font-weight:600;
+    outline:none;
+  }
+  .hl{color:var(--lime);}
+  .copy-btn{
+    background:rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius:0.5rem;
+    padding:0.4rem 0.8rem;
+    font-size:0.85rem;
+    transition:all .2s;
+  }
+  .copy-btn:hover{background:var(--lime);color:#000;}
+</style>
+</head>
+<body class="max-w-md mx-auto">
+
+<h1 class="text-xl font-semibold mb-2" style="color:var(--lime)">Espetada Review (Mobile Test)</h1>
+
+<div class="glass p-4 text-sm leading-relaxed" id="review">
+  <span class="hl"><select id="intro"></select></span>,
+  <span class="hl"><select id="food"></select></span>.
+  <span class="hl"><select id="decor"></select></span>.
+  <span class="hl"><select id="staff"></select></span>.
+  <span class="hl"><select id="recommend"></select></span>
+</div>
+
+<button id="copyBtn" class="copy-btn mt-3">Copy Review</button>
+<p id="copied" class="text-xs text-neutral-400 mt-2 hidden">Copied ✓</p>
+
+<script>
+const DATA={
+  intro:[
+    "Built in the 1970s and regarded by locals as one of the most iconic Espetada restaurants in Funchal",
+    "Located in the old quarter of Funchal, this traditional Espetada house",
+    "Tucked away near the harbour, this charming restaurant",
+    "If you are looking for an authentic Espetada experience, this place will not disappoint",
+    "Perched on a quiet street, this restaurant is famous for its classic skewers"
+  ],
+  food:[
+    "serves remarkable skewers of marinated beef grilled over laurel wood",
+    "offers by far one of the most tender Espetadas I have ever had",
+    "is known for its brilliant balance of flavour and texture",
+    "presents what might be the most impressive Espetada in town",
+    "delivers a meal you will find both satisfying and special"
+  ],
+  decor:[
+    "The décor characterises Madeira’s rustic charm with timber beams and soft lighting",
+    "Its appealing mix of stone and wicker creates a warm atmosphere",
+    "The interior is simple yet impressive, reflecting local craftsmanship",
+    "The space is described as elegant and comfortable, truly unique",
+    "Every corner feels inviting, appreciated for its authenticity"
+  ],
+  staff:[
+    "The staff are gracious and professional",
+    "I was fortunate to meet a brilliant team who enjoy what they do",
+    "Service is considered one of the most positive aspects of the restaurant",
+    "Guests will find the staff attentive and genuinely welcoming",
+    "Known for its friendly service, the team ensures a pleasant visit"
+  ],
+  recommend:[
+    "I highly recommend this restaurant for anyone who appreciates traditional cuisine with a refined touch",
+    "By far one of the most memorable dining experiences you will find in Funchal",
+    "If you are looking for a special dinner, this place will not disappoint",
+    "I guarantee that this restaurant will not disappoint any food lover",
+    "This is a place you simply cannot afford to miss"
+  ]
+};
+
+for(const key in DATA){
+  const sel=document.getElementById(key);
+  DATA[key].forEach((opt,i)=>{
+    const o=document.createElement('option');
+    o.value=i;o.textContent=opt;sel.appendChild(o);
+  });
+}
+
+document.getElementById('copyBtn').onclick=()=>{
+  const parts=[];
+  for(const key in DATA){
+    const i=document.getElementById(key).value;
+    parts.push(DATA[key][i]);
+  }
+  const text=parts.join('. ') + '.';
+  navigator.clipboard.writeText(text).then(()=>{
+    const c=document.getElementById('copied');
+    c.classList.remove('hidden');
+    setTimeout(()=>c.classList.add('hidden'),1500);
+  });
+};
+</script>
+
+</body>
+</html>
